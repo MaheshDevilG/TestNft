@@ -3,22 +3,20 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Mint Portal</title>
+  <title>TestNFT Mint Portal</title>
   <script src="https://cdn.jsdelivr.net/npm/ethers@6.6.2/dist/ethers.umd.min.js"></script>
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
     body {
       margin: 0;
       font-family: 'Poppins', sans-serif;
       background: linear-gradient(135deg, #1a1a2e, #16213e);
       color: #fff;
       height: 100vh;
-      overflow: hidden;
       display: flex;
-      align-items: center;
+      flex-direction: column;
       justify-content: center;
+      align-items: center;
     }
     header {
       position: fixed;
@@ -47,10 +45,9 @@
       backdrop-filter: blur(20px);
       box-shadow: 0 0 40px rgba(0, 255, 204, 0.2);
       text-align: center;
-      transition: 0.3s;
     }
     .card h1 {
-      font-size: 32px;
+      font-size: 36px;
       margin-bottom: 30px;
       background: linear-gradient(to right, #00ffcc, #fffd87);
       -webkit-background-clip: text;
@@ -58,7 +55,7 @@
     }
     #status {
       position: fixed;
-      bottom: 20px;
+      bottom: 80px;
       font-weight: 600;
       font-size: 16px;
       padding: 10px 20px;
@@ -71,6 +68,22 @@
     #status.show {
       opacity: 1;
     }
+    footer {
+      position: fixed;
+      bottom: 20px;
+      font-size: 14px;
+      color: #ccc;
+      text-align: center;
+    }
+    .socials a {
+      color: #00ffcc;
+      text-decoration: none;
+      margin: 0 10px;
+      transition: 0.2s;
+    }
+    .socials a:hover {
+      color: #ffffff;
+    }
   </style>
 </head>
 <body>
@@ -79,11 +92,19 @@
   </header>
 
   <div class="card">
-    <h1>Mint Your Digital Collectible</h1>
+    <h1>TestNFT Minting</h1>
     <button id="mintButton" class="btn">Mint for 0.001 ETH</button>
   </div>
 
   <div id="status"></div>
+
+  <footer>
+    <div class="socials">
+      <a href="https://x.com/TestNFT_" target="_blank">X</a> •
+      <a href="https://t.me/TestNFT" target="_blank">Telegram</a> •
+      <a href="https://github.com/TestNFT" target="_blank">GitHub</a>
+    </div>
+  </footer>
 
   <script>
     const connectButton = document.getElementById('connectButton');
@@ -102,7 +123,7 @@
     let provider, signer, contract;
 
     async function switchToBaseSepolia() {
-      const chainId = '0x14A34'; // Base Sepolia
+      const chainId = '0x14A34'; // 846000 in hex
       try {
         await window.ethereum.request({
           method: 'wallet_switchEthereumChain',
@@ -115,7 +136,7 @@
 
     async function connectWallet() {
       if (!window.ethereum) {
-        alert('MetaMask not detected!');
+        alert('MetaMask is required!');
         return;
       }
 
@@ -136,28 +157,25 @@
 
     async function mintNFT() {
       if (!contract) {
-        alert("Connect your wallet first.");
+        alert("Please connect wallet.");
         return;
       }
 
       try {
         const price = ethers.parseEther("0.001");
-        const quantity = 1;
-
-        const tx = await contract.mint(quantity, { value: price * BigInt(quantity) });
+        const tx = await contract.mint(1, { value: price });
         await tx.wait();
-
-        statusDiv.textContent = "✅ Mint successful!";
-        statusDiv.classList.add('show');
+        showStatus("✅ Mint successful!");
       } catch (err) {
         console.error(err);
-        statusDiv.textContent = "❌ Mint failed.";
-        statusDiv.classList.add('show');
+        showStatus("❌ Mint failed.");
       }
+    }
 
-      setTimeout(() => {
-        statusDiv.classList.remove('show');
-      }, 5000);
+    function showStatus(message) {
+      statusDiv.textContent = message;
+      statusDiv.classList.add('show');
+      setTimeout(() => statusDiv.classList.remove('show'), 4000);
     }
 
     connectButton.addEventListener('click', connectWallet);
