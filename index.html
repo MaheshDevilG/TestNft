@@ -3,183 +3,282 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>TestNFT Mint Portal</title>
+  <title>TestNFT Minting Portal</title>
   <script src="https://cdn.jsdelivr.net/npm/ethers@6.6.2/dist/ethers.umd.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
   <style>
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: 'Poppins', sans-serif;
-      background: linear-gradient(135deg, #1a1a2e, #16213e);
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      min-height: 100%;
+      font-family: 'Orbitron', sans-serif;
+      background: #000;
       color: #fff;
-      height: 100vh;
+      overflow-x: hidden;
+    }
+    body {
+      position: relative;
+      padding-top: 100px;
+      padding-bottom: 150px;
       display: flex;
       flex-direction: column;
-      justify-content: center;
       align-items: center;
     }
+
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -2;
+    }
+
     header {
       position: fixed;
       top: 20px;
       right: 30px;
+      z-index: 5;
     }
+
     .btn {
-      padding: 12px 24px;
+      padding: 14px 30px;
       font-size: 15px;
       border: none;
-      border-radius: 12px;
+      border-radius: 10px;
       background: #00ffcc;
       color: #000;
+      font-weight: bold;
       cursor: pointer;
-      font-weight: 600;
       transition: all 0.3s ease;
+      box-shadow: 0 0 10px #00ffcc, 0 0 40px #00ffcc4d;
     }
+
     .btn:hover {
       background: #00e6b8;
       transform: scale(1.05);
+      box-shadow: 0 0 12px #00ffee, 0 0 60px #00ffee88;
     }
+
     .card {
-      background: rgba(255, 255, 255, 0.05);
+      background: rgba(0, 0, 0, 0.75); /* darker background */
       border-radius: 20px;
-      padding: 40px 60px;
-      backdrop-filter: blur(20px);
-      box-shadow: 0 0 40px rgba(0, 255, 204, 0.2);
+      padding: 30px 25px;
+      max-width: 480px;
+      width: 90%;
       text-align: center;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 0 30px rgba(0, 255, 217, 0.5);
+      border: 1px solid #00ffcc4f;
+      z-index: 3;
     }
-    .card h1 {
-      font-size: 36px;
-      margin-bottom: 30px;
-      background: linear-gradient(to right, #00ffcc, #fffd87);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+
+    h1 {
+      font-size: 28px;
+      margin-bottom: 15px;
+      color: #00ffcc;
     }
+
+    p {
+      font-size: 14px;
+      color: #eee;
+      margin: 8px 0;
+      line-height: 1.6;
+    }
+
+    .mint-section {
+      margin-top: 25px;
+    }
+
     #status {
       position: fixed;
-      bottom: 80px;
-      font-weight: 600;
-      font-size: 16px;
-      padding: 10px 20px;
+      bottom: 110px;
+      font-weight: bold;
       background: rgba(0, 255, 204, 0.1);
       border: 1px solid #00ffcc;
-      border-radius: 10px;
+      border-radius: 12px;
+      padding: 10px 20px;
       opacity: 0;
-      transition: opacity 0.5s ease-in-out;
+      transition: opacity 0.4s;
+      z-index: 5;
     }
+
     #status.show {
       opacity: 1;
     }
+
     footer {
       position: fixed;
       bottom: 20px;
       font-size: 14px;
-      color: #ccc;
+      color: #aaa;
       text-align: center;
+      z-index: 3;
     }
+
     .socials a {
       color: #00ffcc;
       text-decoration: none;
-      margin: 0 10px;
-      transition: 0.2s;
+      margin: 0 12px;
     }
+
     .socials a:hover {
-      color: #ffffff;
+      color: #fff;
     }
   </style>
 </head>
 <body>
-  <header>
-    <button id="connectButton" class="btn">Connect Wallet</button>
-  </header>
 
-  <div class="card">
-    <h1>TestNFT Minting</h1>
-    <button id="mintButton" class="btn">Mint for 0.001 ETH</button>
+<canvas id="bg"></canvas>
+
+<header>
+  <button id="connectButton" class="btn">Connect Wallet</button>
+</header>
+
+<div class="card">
+  <h1>TestNFT</h1>
+  <p><strong>Supply:</strong> 100</p>
+  <p><strong>Price:</strong> 0.0001 ETH</p>
+  <p><strong>Description:</strong> A futuristic collectible from the neon void.</p>
+  <p><strong>Lore:</strong> Each NFT grants passage into a virtual dimension powered by Base Sepolia energy, where digital identity is forged through creativity and code.</p>
+
+  <div class="mint-section">
+    <button id="mintButton" class="btn">Mint Now</button>
   </div>
+</div>
 
-  <div id="status"></div>
+<div id="status"></div>
 
-  <footer>
-    <div class="socials">
-      <a href="https://x.com/TestNFT_" target="_blank">X</a> •
-      <a href="https://t.me/TestNFT" target="_blank">Telegram</a> •
-      <a href="https://github.com/TestNFT" target="_blank">GitHub</a>
-    </div>
-  </footer>
+<footer>
+  <div class="socials">
+    <a href="https://x.com/TestNFT_" target="_blank">X</a> •
+    <a href="https://t.me/TestNFT" target="_blank">Telegram</a> •
+    <a href="https://github.com/TestNFT" target="_blank">GitHub</a>
+  </div>
+</footer>
 
-  <script>
-    const connectButton = document.getElementById('connectButton');
-    const mintButton = document.getElementById('mintButton');
-    const statusDiv = document.getElementById('status');
+<script>
+  const connectButton = document.getElementById('connectButton');
+  const mintButton = document.getElementById('mintButton');
+  const statusDiv = document.getElementById('status');
 
-    const contractAddress = '0x10A85FBfe0362d52DbBD1d1Bbf68be9bD394a9bA';
-    const contractABI = [{
-      "inputs": [{ "internalType": "uint256", "name": "quantity", "type": "uint256" }],
-      "name": "mint",
-      "outputs": [],
-      "stateMutability": "payable",
-      "type": "function"
-    }];
+  const contractAddress = '0x10A85FBfe0362d52DbBD1d1Bbf68be9bD394a9bA';
+  const contractABI = [{
+    "inputs": [{ "internalType": "uint256", "name": "quantity", "type": "uint256" }],
+    "name": "mint",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  }];
 
-    let provider, signer, contract;
+  let provider, signer, contract;
 
-    async function switchToBaseSepolia() {
-      const chainId = '0x14A34'; // 846000 in hex
-      try {
-        await window.ethereum.request({
-          method: 'wallet_switchEthereumChain',
-          params: [{ chainId }]
-        });
-      } catch (err) {
-        console.error(err);
-      }
+  async function switchToBaseSepolia() {
+    const chainId = '0x14A34';
+    try {
+      await window.ethereum.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId }]
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  async function connectWallet() {
+    if (!window.ethereum) {
+      alert('MetaMask is required!');
+      return;
     }
 
-    async function connectWallet() {
-      if (!window.ethereum) {
-        alert('MetaMask is required!');
-        return;
-      }
+    try {
+      await ethereum.request({ method: 'eth_requestAccounts' });
+      provider = new ethers.BrowserProvider(window.ethereum);
+      signer = await provider.getSigner();
+      contract = new ethers.Contract(contractAddress, contractABI, signer);
 
-      try {
-        await ethereum.request({ method: 'eth_requestAccounts' });
-        provider = new ethers.BrowserProvider(window.ethereum);
-        signer = await provider.getSigner();
-        contract = new ethers.Contract(contractAddress, contractABI, signer);
+      const address = await signer.getAddress();
+      connectButton.textContent = address.slice(0, 6) + "..." + address.slice(-4);
 
-        const address = await signer.getAddress();
-        connectButton.textContent = address.slice(0, 6) + "..." + address.slice(-4);
+      await switchToBaseSepolia();
+    } catch (error) {
+      console.error(error);
+    }
+  }
 
-        await switchToBaseSepolia();
-      } catch (error) {
-        console.error(error);
-      }
+  async function mintNFT() {
+    if (!contract) {
+      alert("Please connect wallet.");
+      return;
     }
 
-    async function mintNFT() {
-      if (!contract) {
-        alert("Please connect wallet.");
-        return;
-      }
-
-      try {
-        const price = ethers.parseEther("0.001");
-        const tx = await contract.mint(1, { value: price });
-        await tx.wait();
-        showStatus("✅ Mint successful!");
-      } catch (err) {
-        console.error(err);
-        showStatus("❌ Mint failed.");
-      }
+    try {
+      const price = ethers.parseEther("0.0001");
+      const tx = await contract.mint(1, { value: price });
+      await tx.wait();
+      showStatus("✅ Mint successful!");
+    } catch (err) {
+      console.error(err);
+      showStatus("❌ Mint failed.");
     }
+  }
 
-    function showStatus(message) {
-      statusDiv.textContent = message;
-      statusDiv.classList.add('show');
-      setTimeout(() => statusDiv.classList.remove('show'), 4000);
+  function showStatus(message) {
+    statusDiv.textContent = message;
+    statusDiv.classList.add('show');
+    setTimeout(() => statusDiv.classList.remove('show'), 4000);
+  }
+
+  connectButton.addEventListener('click', connectWallet);
+  mintButton.addEventListener('click', mintNFT);
+</script>
+
+<script>
+  const canvas = document.getElementById("bg");
+  const ctx = canvas.getContext("2d");
+  let particles = [];
+
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+
+  function createParticles() {
+    particles = [];
+    for (let i = 0; i < 200; i++) {
+      particles.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        radius: Math.random() * 1.5 + 0.5,
+        speedY: Math.random() * 0.5 + 0.2
+      });
     }
+  }
 
-    connectButton.addEventListener('click', connectWallet);
-    mintButton.addEventListener('click', mintNFT);
-  </script>
+  function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#00ffee";
+    particles.forEach(p => {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+      ctx.fill();
+      p.y += p.speedY;
+      if (p.y > canvas.height) {
+        p.y = 0;
+        p.x = Math.random() * canvas.width;
+      }
+    });
+    requestAnimationFrame(animate);
+  }
+
+  window.addEventListener("resize", () => {
+    resizeCanvas();
+    createParticles();
+  });
+
+  resizeCanvas();
+  createParticles();
+  animate();
+</script>
+
 </body>
 </html>
