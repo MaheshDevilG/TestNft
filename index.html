@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mint Portal</title>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.6.2/dist/ethers.umd.min.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #1a1a2e, #16213e);
+      color: #fff;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    header {
+      position: fixed;
+      top: 20px;
+      right: 30px;
+    }
+    .btn {
+      padding: 12px 24px;
+      font-size: 15px;
+      border: none;
+      border-radius: 12px;
+      background: #00ffcc;
+      color: #000;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+    .btn:hover {
+      background: #00e6b8;
+      transform: scale(1.05);
+    }
+    .card {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 20px;
+      padding: 40px 60px;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 0 40px rgba(0, 255, 204, 0.2);
+      text-align: center;
+      transition: 0.3s;
+    }
+    .card h1 {
+      font-size: 32px;
+      margin-bottom: 30px;
+      background: linear-gradient(to right, #00ffcc, #fffd87);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    #status {
+      position: fixed;
+      bottom: 20px;
+      font-weight: 600;
+      font-size: 16px;
+      padding: 10px 20px;
+      background: rgba(0, 255, 204, 0.1);
+      border: 1px solid #00ffcc;
+      border-radius: 10px;
+      opacity: 0;
+      transition: opacity 0.5s ease-in-out;
+    }
+    #status.show {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <button id="connectButton" class="btn">Connect Wallet</button>
+  </header>
+
+  <div class="card">
+    <h1>Mint Your Digital Collectible</h1>
+    <button id="mintButton" class="btn">Mint for 0.001 ETH</button>
+  </div>
+
+  <div id="status"></div>
+
+  <script>
+    const connectButton = document.getElementById('connectButton');
+    const mintButton = document.getElementById('mintButton');
+    const statusDiv = document.getElementById('status');
+
+    const contractAddress = '0x10A85FBfe0362d52DbBD1d1Bbf68be9bD394a9bA';
+    const contractABI = [{
+      "inputs": [{ "internalType": "uint256", "name": "quantity", "type": "uint256" }],
+      "name": "mint",
+      "outputs": [],
+      "stateMutability": "payable",
+      "type": "function"
+    }];
+
+    let provider, signer, contract;
+
+    async function switchToBaseSepolia() {
+      const chainId = '0x14A34'; // Base Sepolia
+      try {
+        await window.ethereum.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId }]
+        });
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function connectWallet() {
+      if (!window.ethereum) {
+        alert('MetaMask not detected!');
+        return;
+      }
+
+      try {
+        await ethereum.request({ method: 'eth_requestAccounts' });
+        provider = new ethers.BrowserProvider(window.ethereum);
+        signer = await provider.getSigner();
+        contract = new ethers.Contract(contractAddress, contractABI, signer);
+
+        const address = await signer.getAddress();
+        connectButton.textContent = address.slice(0, 6) + "..." + address.slice(-4);
+
+        await switchToBaseSepolia();
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    async function mintNFT() {
+      if (!contract) {
+        alert("Connect your wallet first.");
+        return;
+      }
+
+      try {
+        const price = ethers.parseEther("0.001");
+        const quantity = 1;
+
+        const tx = await contract.mint(quantity, { value: price * BigInt(quantity) });
+        await tx.wait();
+
+        statusDiv.textContent = "✅ Mint successful!";
+        statusDiv.classList.add('show');
+      } catch (err) {
+        console.error(err);
+        statusDiv.textContent = "❌ Mint failed.";
+        statusDiv.classList.add('show');
+      }
+
+      setTimeout(() => {
+        statusDiv.classList.remove('show');
+      }, 5000);
+    }
+
+    connectButton.addEventListener('click', connectWallet);
+    mintButton.addEventListener('click', mintNFT);
+  </script>
+</body>
+</html>
